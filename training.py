@@ -115,9 +115,9 @@ class Training(object):
         path = path_to_lm_wts.joinpath(self._name, 'weights.{epoch:02d}-{val_loss:.2f}.hdf5').as_posix()
         saver = ModelCheckpoint(path, monitor='val_perplexity', verbose=1, save_best_only=False, save_weights_only=True,
                                 mode='min', period=self._save_period)
-        tensorboard = self._tensorboard_log_path.joinpath(self._name,
-                                                          '{}'.format(format(strftime("%Y-%m-%d %H:%M:%S", gmtime()))))
-        callbacks = [tensorboard, Perplexity()]
+        tensorboard = TrainValTensorBoard(self._tensorboard_log_path.joinpath(self._name,
+                                                          '{}'.format(format(strftime("%Y-%m-%d %H:%M:%S", gmtime())))).as_posix())
+        callbacks = [saver, tensorboard, Perplexity()]
         self._processor.save(self._name)
         self._lm.get_model().fit_generator(train_gen, steps_per_epoch=len(train_gen),
                                            epochs=epochs, verbose=0, validation_data=val_gen,
