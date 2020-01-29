@@ -33,10 +33,13 @@ class Processor(object):
         self._max_char_len = max_char_len
         if word2vec_path:
             self._w2v = KeyedVectors.load_word2vec_format(word2vec_path, binary=False)
+            self._w2v.add(pad_tok, np.zeros((1, self._w2v.vector_size)))
+            self._w2v.add(end_tok, np.random.random((1, self._w2v.vector_size)))
+            self._w2v.add(unk_tok, np.random.random((1, self._w2v.vector_size)))
             self._vocab2int = {tok: i for i, tok in
-                               enumerate([pad_tok] + list(self._w2v.vocab.keys()) + [unk_tok, end_tok])}
+                               enumerate(list(self._w2v.vocab.keys()))}
             self._int2vocab = {i: tok for i, tok in
-                               enumerate([pad_tok] + list(self._w2v.vocab.keys()) + [unk_tok, end_tok])}
+                               enumerate(list(self._w2v.vocab.keys()))}
             self._char_vocab2int = {ch: idx for idx, ch in enumerate(
                 [pad_tok] + list(set([ch for tok in list(self._vocab2int.keys())[1:-1] for ch in tok])) + [unk_tok])}
             self._char_int2vocab = {idx: ch for idx, ch in enumerate(
@@ -84,9 +87,6 @@ class Processor(object):
 
     def get_vectors(self):
         all_vectors = self._w2v.vectors
-        all_vectors = np.append(np.zeros((1, self._w2v.vector_size)), all_vectors, axis=0)
-        all_vectors = np.append(all_vectors, np.random.random((1, self._w2v.vector_size)), axis=0)
-        all_vectors = np.append(all_vectors, np.random.random((1, self._w2v.vector_size)), axis=0)
         return all_vectors
 
     def _get_padded_toks(self, all_tokenized_texts):
