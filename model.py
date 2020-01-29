@@ -103,7 +103,7 @@ class LanguageModel(object):
                       recurrent_dropout=self._rnn_dropout, go_backwards=rev,
                       name='{}_1'.format(name), trainable=True)(inp)
         merged_inp = concatenate([inp, _lstm1], name='{}_merge_lstm1_embed'.format(name))
-        _lstm2 = LSTM(units=K.get_value(inp.shape[-1]),
+        _lstm2 = LSTM(units=inp.shape[-1],
                       return_sequences=True,
                       recurrent_dropout=self._rnn_dropout,
                       name='{}_2'.format(name), trainable=True)(merged_inp)
