@@ -167,9 +167,9 @@ class Processor(object):
 
         for name, obj in obj_dict.items():
             self.__setattr__(name, obj)
+            logger.info('loaded attribute {} successfully'.format(name))
 
         w2v = KeyedVectors.load_word2vec_format(path.joinpath('w2v'), binary=False)
-
         self.__setattr__('_w2v', w2v)
+        logger.info('loaded attribute {} successfully'.format('_w2v'))
 
-        logger.info('loaded object successfully')
