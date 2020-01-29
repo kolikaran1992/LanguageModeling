@@ -47,7 +47,8 @@ class BatchGenerator(Sequence):
 
 
 class Training(object):
-    def __init__(self, word2vec_path=None,
+    def __init__(self,
+                 word2vec_path=None,
                  max_seq_len=None,
                  max_word_len=None,
                  all_jtypes=None,
@@ -90,7 +91,7 @@ class Training(object):
             char_cnn_ker_size=char_cnn_ker_size,
             char_cnn_pool_size=char_cnn_pool_size
         )
-        logger.info('initialized text processor successfully')
+        logger.info('initialized word2vec successfully')
 
     def compile_model(self, optimizer=None, loss=None, metrics=None):
         self._lm.get_model().compile(optimizer, loss=loss, metrics=metrics)
@@ -117,9 +118,9 @@ class Training(object):
         tensorboard = self._tensorboard_log_path.joinpath(self._name,
                                                           '{}'.format(format(strftime("%Y-%m-%d %H:%M:%S", gmtime()))))
         callbacks = [saver, tensorboard, Perplexity()]
-
         self.compile_model()
+        self._processor.save(self._name)
         self._lm.get_model().fit_generator(train_gen, steps_per_epoch=len(train_gen),
-                                           epochs=epochs, verbose=1, validation_data=val_gen,
+                                           epochs=epochs, verbose=0, validation_data=val_gen,
                                            validation_steps=len(val_gen), initial_epoch=initial_epoch,
                                            callbacks=callbacks)

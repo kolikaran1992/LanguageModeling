@@ -56,6 +56,7 @@ class LanguageModel(object):
                                  weights=[self._word_emb_wts],
                                  name='word_embeddings', trainable=False)(masked_word_in)
         else:
+            logger.info('No embedding weights passed, embeddings will have to be trained')
             emb_word = Embedding(input_dim=self._word_vocab_size,
                                  output_dim=self._word_emb_size,
                                  input_length=self._max_seq_len,
