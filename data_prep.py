@@ -16,9 +16,9 @@ lower = False
 
 class Processor(object):
     def __init__(self,
-                 word2vec_path='',
-                 max_len=50,
-                 max_char_len=15,
+                 word2vec_path=None,
+                 max_len=None,
+                 max_char_len=None,
                  all_jtypes=(),
                  tokenizer=None
                  ):
@@ -28,20 +28,24 @@ class Processor(object):
             reg = r'\w+|[^\w\s]'
             self._tokenizer = RegexpTokenizer(reg)
             logger.info('{}: using default regex ({}) tokenizer'.format(self.__class__.__name__, reg))
+
         self._max_len = max_len
         self._max_char_len = max_char_len
+        if word2vec_path:
+            self._w2v = KeyedVectors.load_word2vec_format(word2vec_path, binary=False)
+            self._vocab2int = {tok: i for i, tok in
+                               enumerate([pad_tok] + list(self._w2v.vocab.keys()) + [unk_tok, end_tok])}
+            self._int2vocab = {i: tok for i, tok in
+                               enumerate([pad_tok] + list(self._w2v.vocab.keys()) + [unk_tok, end_tok])}
+            self._char_vocab2int = {ch: idx for idx, ch in enumerate(
+                [pad_tok] + list(set([ch for tok in list(self._vocab2int.keys())[1:-1] for ch in tok])) + [unk_tok])}
+            self._char_int2vocab = {idx: ch for idx, ch in enumerate(
+                [pad_tok] + list(set([ch for tok in list(self._vocab2int.keys())[1:-1] for ch in tok])) + [unk_tok])}
+        else:
+            logger.info('no word vector path provided, vectors and vocabs will not be initialized')
 
-        self._w2v = KeyedVectors.load_word2vec_format(word2vec_path, binary=False)
         self._jtype2int_dict = {jtype: idx for idx, jtype in enumerate([pad_tok] + all_jtypes + [unk_tok])}
         self._int2jtype_dict = {idx: jtype for idx, jtype in enumerate([pad_tok] + all_jtypes + [unk_tok])}
-        self._vocab2int = {tok: i for i, tok in
-                           enumerate([pad_tok] + list(self._w2v.vocab.keys()) + [unk_tok, end_tok])}
-        self._int2vocab = {i: tok for i, tok in
-                           enumerate([pad_tok] + list(self._w2v.vocab.keys()) + [unk_tok, end_tok])}
-        self._char_vocab2int = {ch: idx for idx, ch in enumerate(
-            [pad_tok] + list(set([ch for tok in list(self._vocab2int.keys())[1:-1] for ch in tok])) + [unk_tok])}
-        self._char_int2vocab = {idx: ch for idx, ch in enumerate(
-            [pad_tok] + list(set([ch for tok in list(self._vocab2int.keys())[1:-1] for ch in tok])) + [unk_tok])}
 
     def extract_tokens(self, text):
         return [tok for tok in self._tokenizer.tokenize(text.lower() if lower else text)]
