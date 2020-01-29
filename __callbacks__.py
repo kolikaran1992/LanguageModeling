@@ -149,3 +149,11 @@ class TrainValTensorBoard(TensorBoard):
     def on_train_end(self, logs=None):
         super(TrainValTensorBoard, self).on_train_end(logs)
         self.val_writer.close()
+
+class Perplexity(Callback):
+    def on_epoch_end(self, epoch, logs={}):
+        super(Perplexity, self).on_epoch_end(epoch, logs=logs)
+        logger_console.info('epoch {} end || train_perplexity : {} || val_perplexity : {}'.format(epoch+1, 2**logs['loss'],
+                                                                                              2**logs['val_loss']))
+        logs['perplexity'] = 2**logs['loss']
+        logs['val_perplexity'] = 2**logs['val_loss']

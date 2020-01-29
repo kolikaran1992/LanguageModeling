@@ -1,0 +1,5 @@
+{
+  "word2vec_path": "w2v_all_raw_cap_128.txt",
+  "max_seq_len": 50,
+  "max_char_len": 15
+}
