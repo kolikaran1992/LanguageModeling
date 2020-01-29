@@ -9,6 +9,9 @@ from keras.utils import Sequence
 tokenizer = RegexpTokenizer(r'\w+|\n+|[^\w\s]')
 lower = False
 
+dtype_int = 'int32'
+dtype_float = 'float32'
+
 
 def extract_tokens(text):
     return [tok for tok in tokenizer.tokenize(text)]
