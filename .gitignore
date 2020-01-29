@@ -2,6 +2,7 @@
 .idea/
 logs/
 weights/*
+!.gitkeep
 !data_processor/.gitkeep
 !logs/.gitkeep
 !weights/.gitkeep
