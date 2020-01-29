@@ -5,6 +5,7 @@ from .__commons__ import *
 from .__layers__ import *
 from .__logger__ import LOGGER_NAME
 import logging
+import numpy
 
 logger = logging.getLogger(LOGGER_NAME + '_console')
 
@@ -48,7 +49,7 @@ class LanguageModel(object):
 
     def _get_word_embedding_layer(self, word_in):
         masked_word_in = Mask(mask_value=self._word_inp_mask, name='masked_word_inputs')(word_in)
-        if self._word_emb_wts:
+        if type(self._word_emb_wts) is numpy.ndarray:
             emb_word = Embedding(input_dim=self._word_vocab_size,
                                  output_dim=self._word_emb_size,
                                  input_length=self._max_seq_len,
