@@ -6,6 +6,8 @@ import numpy as np
 from .__commons__ import *
 from .__logger__ import LOGGER_NAME
 import logging
+from .__paths__ import path_to_processor
+import pickle
 
 logger = logging.getLogger(LOGGER_NAME + '_console')
 
@@ -132,3 +134,35 @@ class Processor(object):
         all_outputs = self._get_outputs(all_tokenized_texts)
 
         return all_paded_toks, all_paded_chars, all_jtypes, all_outputs
+
+    def save(self, name):
+        path = path_to_processor.joinpath(name)
+        path.mkdir(parents=True, exist_ok=True)
+        obj_dict = {}
+        for name, obj in self.__dict__.items():
+            if name == '_w2v':
+                continue
+            obj_dict[name] = obj
+
+        with open(path.joinpath('objects.pkl'), 'wb', encoding='utf-8') as f:
+            pickle.dump(obj_dict, f)
+
+        self._w2v.save_word2vec_format(path.joinpath('w2v'))
+        logger.info('object saved successfully')
+
+    def load(self, name):
+        path = path_to_processor.joinpath(name)
+        if not path.is_dir():
+            logger.error('data processor object for {} does not exists'.format(name))
+
+        with open(path.joinpath('objects.pkl'), 'rb', encoding='utf-8') as f:
+            obj_dict = pickle.load(f)
+
+        for name, obj in obj_dict.items():
+            self.__setattr__(name, obj)
+
+        w2v = KeyedVectors.load_word2vec_format(path.joinpath('w2v'), binary=False)
+
+        self.__setattr__('_w2v', w2v)
+
+        logger.info('loaded object successfully')
