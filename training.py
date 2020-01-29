@@ -113,8 +113,8 @@ class Training(object):
             batch_size=batch_size
         )
         path = path_to_lm_wts.joinpath(self._name, 'weights.{epoch:02d}-{val_loss:.2f}.hdf5').as_posix()
-        saver = ModelCheckpoint(path, monitor='val_perplexity', verbose=0, save_best_only=False, save_weights_only=True,
-                                mode='auto', period=self._save_period)
+        saver = ModelCheckpoint(path, monitor='val_perplexity', verbose=1, save_best_only=False, save_weights_only=True,
+                                mode='min', period=self._save_period)
         tensorboard = self._tensorboard_log_path.joinpath(self._name,
                                                           '{}'.format(format(strftime("%Y-%m-%d %H:%M:%S", gmtime()))))
         callbacks = [saver, tensorboard, Perplexity()]
