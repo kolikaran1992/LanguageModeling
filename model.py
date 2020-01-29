@@ -118,6 +118,7 @@ class LanguageModel(object):
         jtype_in = Input(shape=(self._max_seq_len,), name='jtype_inputs', dtype=dtype_int)
 
         embedding_layer = self._get_embedding_layer(word_in, char_in, jtype_in)
+        print(type(embedding_layer.shape[-1]))
 
         l2r_lstm = self._get_elmo_style_lstm_out(embedding_layer, name='l2r_lstm', rev=False, units=embedding_layer.shape[-1])
         r2l_lstm = self._get_elmo_style_lstm_out(embedding_layer, name='r2l_lstm', rev=True, units=embedding_layer.shape[-1])
