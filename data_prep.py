@@ -144,7 +144,7 @@ class Processor(object):
                 continue
             obj_dict[name] = obj
 
-        with open(path.joinpath('objects.pkl'), 'wb', encoding='utf-8') as f:
+        with open(path.joinpath('objects.pkl'), 'wb') as f:
             pickle.dump(obj_dict, f)
 
         self._w2v.save_word2vec_format(path.joinpath('w2v'))
@@ -155,7 +155,7 @@ class Processor(object):
         if not path.is_dir():
             logger.error('data processor object for {} does not exists'.format(name))
 
-        with open(path.joinpath('objects.pkl'), 'rb', encoding='utf-8') as f:
+        with open(path.joinpath('objects.pkl'), 'rb') as f:
             obj_dict = pickle.load(f)
 
         for name, obj in obj_dict.items():
