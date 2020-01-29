@@ -5,7 +5,7 @@ from .__commons__ import *
 from .__layers__ import *
 from .__logger__ import LOGGER_NAME
 import logging
-import numpy
+import numpy as np
 
 logger = logging.getLogger(LOGGER_NAME + '_console')
 
@@ -49,7 +49,7 @@ class LanguageModel(object):
 
     def _get_word_embedding_layer(self, word_in):
         masked_word_in = Mask(mask_value=self._word_inp_mask, name='masked_word_inputs')(word_in)
-        if type(self._word_emb_wts) is numpy.ndarray:
+        if type(self._word_emb_wts) is np.ndarray:
             emb_word = Embedding(input_dim=self._word_vocab_size,
                                  output_dim=self._word_emb_size,
                                  input_length=self._max_seq_len,
@@ -109,7 +109,7 @@ class LanguageModel(object):
                       name='{}_2'.format(name), trainable=True)(merged_inp)
         return _lstm2
 
-    def model(self):
+    def get_model(self):
         if self._model:
             return self._model
 
@@ -128,3 +128,19 @@ class LanguageModel(object):
         model = Model(inputs=[word_in, char_in, jtype_in], outputs=[model], name='LanguageModel')
         self._model = model
         return self._model
+
+    def save_model_weights(self, path):
+        if not path.is_dir():
+            logger.error('could not save weights, since the input path is not a valid directory')
+        for layer in self._model.layers:
+            np.save(path.joinpath(layer.name), layer.get_weights())
+        logger.info('saved model weights successfully')
+
+    def load_model_weights(self, path):
+        if not path.is_dir():
+            logger.error('could not load weights, since the input path is not a valid directory')
+        for p in path.glob('*.npy'):
+            for layer in self._model.layers:
+                if p.name.strip('.npy') == layer.name:
+                    layer.set_weights(np.load(p, allow_pickle=True))
+        logger.info('loaded model weights successfully')
