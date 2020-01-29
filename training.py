@@ -125,3 +125,7 @@ class Training(object):
                                            epochs=epochs, verbose=0, validation_data=val_gen,
                                            validation_steps=len(val_gen), initial_epoch=initial_epoch,
                                            callbacks=callbacks)
+
+    def load_model_wts(self, path):
+        self._lm.get_model().load_weights(path)
+        logger.info('weights loaded successfully for the language model "{}"'.format(self._name))

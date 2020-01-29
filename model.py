@@ -129,19 +129,3 @@ class LanguageModel(object):
         model = Model(inputs=[word_in, char_in, jtype_in], outputs=[model], name='LanguageModel')
         self._model = model
         return self._model
-
-    def save_model_weights(self, path):
-        if not path.is_dir():
-            logger.error('could not save weights, since the input path is not a valid directory')
-        for layer in self._model.layers:
-            np.save(path.joinpath(layer.name), layer.get_weights())
-        logger.info('saved model weights successfully')
-
-    def load_model_weights(self, path):
-        if not path.is_dir():
-            logger.error('could not load weights, since the input path is not a valid directory')
-        for p in path.glob('*.npy'):
-            for layer in self._model.layers:
-                if p.name.strip('.npy') == layer.name:
-                    layer.set_weights(np.load(p, allow_pickle=True))
-        logger.info('loaded model weights successfully')
