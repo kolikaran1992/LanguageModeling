@@ -1,4 +1,5 @@
 *.pyc
+train_lm.py
 .idea/
 logs/*
 weights/*

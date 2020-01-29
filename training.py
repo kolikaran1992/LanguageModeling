@@ -118,7 +118,9 @@ class Training(object):
         saver = ModelCheckpoint(path, monitor='val_perplexity', verbose=1, save_best_only=False, save_weights_only=True,
                                 mode='min', period=self._save_period)
         tensorboard = TrainValTensorBoard(self._tensorboard_log_path.joinpath(self._name,
-                                                          '{}'.format(format(strftime("%Y-%m-%d %H:%M:%S", gmtime())))).as_posix())
+                                                                              '{}'.format(format(
+                                                                                  strftime("%Y-%m-%d %H:%M:%S",
+                                                                                           gmtime())))).as_posix())
         callbacks = [saver, tensorboard, Perplexity()]
         self._processor.save(self._name)
         self._lm.get_model().fit_generator(train_gen, steps_per_epoch=len(train_gen),
