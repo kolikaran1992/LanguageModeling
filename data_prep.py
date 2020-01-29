@@ -44,8 +44,11 @@ class Processor(object):
         else:
             logger.info('no word vector path provided, vectors and vocabs will not be initialized')
 
-        self._jtype2int_dict = {jtype: idx for idx, jtype in enumerate([pad_tok] + all_jtypes + [unk_tok])}
-        self._int2jtype_dict = {idx: jtype for idx, jtype in enumerate([pad_tok] + all_jtypes + [unk_tok])}
+        if all_jtypes:
+            self._jtype2int_dict = {jtype: idx for idx, jtype in enumerate([pad_tok] + all_jtypes + [unk_tok])}
+            self._int2jtype_dict = {idx: jtype for idx, jtype in enumerate([pad_tok] + all_jtypes + [unk_tok])}
+        else:
+            logger.info('jtypes will not be initialized')
 
     def extract_tokens(self, text):
         return [tok for tok in self._tokenizer.tokenize(text.lower() if lower else text)]
