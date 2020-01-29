@@ -97,13 +97,13 @@ class LanguageModel(object):
 
         return final_emb
 
-    def _get_elmo_style_lstm_out(self, inp, name='', rev=False, units=None):
-        _lstm1 = LSTM(units=units,
+    def _get_elmo_style_lstm_out(self, inp, name='', rev=False):
+        _lstm1 = LSTM(units=inp.get_shape().as_list()[-1],
                       return_sequences=True,
                       recurrent_dropout=self._rnn_dropout, go_backwards=rev,
                       name='{}_1'.format(name), trainable=True)(inp)
         merged_inp = concatenate([inp, _lstm1], name='{}_merge_lstm1_embed'.format(name))
-        _lstm2 = LSTM(units=units,
+        _lstm2 = LSTM(units=inp.get_shape().as_list()[-1],
                       return_sequences=True,
                       recurrent_dropout=self._rnn_dropout,
                       name='{}_2'.format(name), trainable=True)(merged_inp)
@@ -118,14 +118,9 @@ class LanguageModel(object):
         jtype_in = Input(shape=(self._max_seq_len,), name='jtype_inputs', dtype=dtype_int)
 
         embedding_layer = self._get_embedding_layer(word_in, char_in, jtype_in)
-        print(type(embedding_layer.shape[-1]))
-        print(dir(embedding_layer))
-        print(dir(embedding_layer.shape))
-        print(embedding_layer.get_shape().as_list())
 
-
-        l2r_lstm = self._get_elmo_style_lstm_out(embedding_layer, name='l2r_lstm', rev=False, units=embedding_layer.shape[-1])
-        r2l_lstm = self._get_elmo_style_lstm_out(embedding_layer, name='r2l_lstm', rev=True, units=embedding_layer.shape[-1])
+        l2r_lstm = self._get_elmo_style_lstm_out(embedding_layer, name='l2r_lstm', rev=False)
+        r2l_lstm = self._get_elmo_style_lstm_out(embedding_layer, name='r2l_lstm', rev=True)
         merged = concatenate([l2r_lstm, r2l_lstm], name='merge_lstm1_lstm2')
 
         model = TimeDistributed(Dense(self._word_vocab_size, name='token_prediction', activation='softmax'))(
