@@ -109,6 +109,9 @@ class LanguageModel(object):
         return _lstm2
 
     def model(self):
+        if self._model:
+            return self._model
+
         word_in = Input(shape=(self._max_seq_len,), name='token_inputs', dtype=dtype_int)
         char_in = Input(shape=(self._max_seq_len, self._max_word_len,), name='char_inputs', dtype=dtype_int)
         jtype_in = Input(shape=(self._max_seq_len,), name='jtype_inputs', dtype=dtype_int)
@@ -123,3 +126,4 @@ class LanguageModel(object):
             merged)
         model = Model(inputs=[word_in, char_in, jtype_in], outputs=[model], name='LanguageModel')
         self._model = model
+        return self._model
