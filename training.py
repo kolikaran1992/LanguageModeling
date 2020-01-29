@@ -112,7 +112,7 @@ class Training(object):
             text_processor=self._processor, shuffle=True,
             batch_size=batch_size
         )
-        path = path_to_lm_wts.joinpath(self._name, 'weights.{epoch:02d}-{val_loss:.2f}.hdf5')
+        path = path_to_lm_wts.joinpath(self._name, 'weights.{epoch:02d}-{val_loss:.2f}.hdf5').as_posix()
         saver = ModelCheckpoint(path, monitor='val_perplexity', verbose=0, save_best_only=False, save_weights_only=True,
                                 mode='auto', period=self._save_period)
         tensorboard = self._tensorboard_log_path.joinpath(self._name,
