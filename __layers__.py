@@ -55,3 +55,31 @@ class Mask(Layer):
 
     def compute_mask(self, inputs, mask=None):
         return K.not_equal(inputs, self._mask_val)
+
+
+class ElmoEmb(Layer):
+    def __init__(self, **kwargs):
+        super(ElmoEmb, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        self._a = self.add_weight(name='input_embed_multiplier',
+                                  shape=(1,),
+                                  initializer='uniform',
+                                  trainable=True)
+        self._b = self.add_weight(name='lstm_1_multiplier',
+                                  shape=(1,),
+                                  initializer='uniform',
+                                  trainable=True)
+        self._c = self.add_weight(name='lstm_2_multiplier',
+                                  shape=(1,),
+                                  initializer='uniform',
+                                  trainable=True)
+        super(ElmoEmb, self).build(input_shape)
+
+    def call(self, x, **kwargs):
+        inpu_emb, lstm1_merged, lstm2_merged = x
+        return add([self._a * inpu_emb, self._b * lstm1_merged, self._c * lstm2_merged])
+
+    #
+    # def compute_output_shape(self, input_shape):
+    #     return input_shape[0]
