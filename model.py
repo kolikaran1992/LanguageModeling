@@ -26,8 +26,8 @@ class LanguageModel(object):
                  char_cnn_filters=None,
                  char_cnn_ker_size=None,
                  char_cnn_pool_size=None,
-                 dropout=0.4,
-                 rnn_dropout=0.4
+                 dropout=0.5,
+                 rnn_dropout=0.5
                  ):
         self._model = None
         self._max_seq_len = max_seq_len
@@ -74,7 +74,7 @@ class LanguageModel(object):
                                           trainable=train_wts),
                                    name='time_distributed_char_cnn',
                                    trainable=train_wts)(emb_char)
-        emb_char = TimeDistributed(Dropout(self._dropout))(emb_char)
+        emb_char = TimeDistributed(Dropout(self._dropout), name='timedistributed_char_cnn_dropout')(emb_char)
         emb_char = TimeDistributed(MaxPool1D(pool_size=self._char_cnn_pool_size), name='char_cnn_pooling')(emb_char)
         emb_char = TimeDistributed(Flatten(), name='char_cnn_flatten')(emb_char)
 
@@ -99,12 +99,12 @@ class LanguageModel(object):
         return final_emb
 
     def _get_elmo_style_lstm_out(self, inp, name='', rev=False, train_wts=True):
-        _lstm1 = LSTM(units=inp.get_shape().as_list()[-1],
+        _lstm1 = LSTM(units=inp.get_shape().as_list()[-1]//2,
                       return_sequences=True,
                       recurrent_dropout=self._rnn_dropout, go_backwards=rev,
                       name='{}_1'.format(name), trainable=train_wts)(inp)
         merged_inp = concatenate([inp, _lstm1], name='{}_merge_lstm1_embed'.format(name))
-        _lstm2 = LSTM(units=inp.get_shape().as_list()[-1],
+        _lstm2 = LSTM(units=inp.get_shape().as_list()[-1]//2,
                       return_sequences=True,
                       recurrent_dropout=self._rnn_dropout,
                       name='{}_2'.format(name), trainable=train_wts)(merged_inp)
