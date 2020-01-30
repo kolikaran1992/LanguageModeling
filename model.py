@@ -151,7 +151,7 @@ class SeqLabeller(LanguageModel):
         merged_lstm1 = concatenate([l2r_lstm1, r2l_lstm1], name='merge_lstm1')
         merged_lstm2 = concatenate([l2r_lstm2, r2l_lstm2], name='merge_lstm1_lstm2')
 
-        elmo_emb = ElmoEmb(name='elmo_embedding')([embedding_layer, merged_lstm1, merged_lstm2])
+        elmo_emb = ElmoEmb(name='elmo_embedding')([concatenate([embedding_layer, embedding_layer]), merged_lstm1, merged_lstm2])
 
         model = TimeDistributed(Dense(self._num_labels, name='output_prediction', activation='softmax'))(
             elmo_emb)
