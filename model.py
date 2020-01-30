@@ -158,12 +158,11 @@ class SeqLabeller(LanguageModel):
         elmo_emb = ElmoEmb(name='elmo_embedding')(
             [concatenate([embedding_layer, embedding_layer]), merged_lstm1, merged_lstm2])
 
-        bidirectional_lstm = TimeDistributed(Bidirectional(LSTM(units=self._lstm_units,
+        bidirectional_lstm = Bidirectional(LSTM(units=self._lstm_units,
                                                                 return_sequences=True,
                                                                 recurrent_dropout=self._rnn_dropout,
                                                                 name='pre_prediction_lstm'),
-                                                           name='bidirectional_lstm'),
-                                             name='time_distributed_lstm')(elmo_emb)
+                                                           name='bidirectional_lstm')(elmo_emb)
 
         model = TimeDistributed(Dense(self._num_labels, name='output_prediction', activation='softmax'))(
             bidirectional_lstm)
