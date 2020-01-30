@@ -4,7 +4,7 @@ from time import gmtime, strftime
 from sklearn.model_selection import train_test_split
 from keras.callbacks import ModelCheckpoint
 from .__callbacks__ import *
-from .__paths__ import path_to_lm_wts
+from .__paths__ import path_to_lm_wts, path_to_processor
 from .__logger__ import LOGGER_NAME
 import logging
 import numpy as np
@@ -124,10 +124,13 @@ class Training(object):
         callbacks = [saver, tensorboard, Perplexity()]
         self._processor.save(self._name)
         self._lm.get_model().fit_generator(train_gen, steps_per_epoch=len(train_gen),
-                                           epochs=epochs, verbose=0, validation_data=val_gen,
+                                           epochs=epochs, verbose=1, validation_data=val_gen,
                                            validation_steps=len(val_gen), initial_epoch=initial_epoch,
                                            callbacks=callbacks)
 
-    def load_model_wts(self, path):
-        self._lm.get_model().load_weights(path)
-        logger.info('weights loaded successfully for the language model "{}"'.format(self._name))
+    def load(self):
+        model_wts_path = list(path_to_lm_wts.joinpath(self._name).glob('*.hdf5'))[-1]
+        self._lm.get_model().load_weights(model_wts_path)
+        self._processor.load(self._name)
+        logger.info('load operation successfully for "{}"'.format(self._name))
+
