@@ -7,10 +7,10 @@ logger_console = logging.getLogger(LOGGER_NAME+'_console')
 logger_file = logging.getLogger(LOGGER_NAME+'_file')
 
 formatter = logging.Formatter('%(asctime)s :: %(levelname)s :: %(name)s :: %(message)s')
-
+formatter_file = logging.Formatter('%(asctime)s :: %(levelname)s :: %(name)s \n %(message)s')
 # define file handler and set formatter
 file_handler = logging.FileHandler(path_to_logs.joinpath(datetime.datetime.now().strftime("%Y-%m-%d")).as_posix())
-file_handler.setFormatter(logging.Formatter(''))
+file_handler.setFormatter(formatter_file)
 
 # define console handler and set formatter
 console_handler = logging.StreamHandler()

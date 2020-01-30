@@ -9,8 +9,17 @@ import os
 import tensorflow as tf
 from keras.callbacks import TensorBoard
 
-logger_file = logging.getLogger(LOGGER_NAME + '_file')
+logger_file = logging.getLogger('metrics')
 logger_console = logging.getLogger(LOGGER_NAME + '_console')
+
+from .__paths__ import path_to_logs
+import logging
+import datetime
+
+formatter_file = logging.Formatter('%(asctime)s :: %(levelname)s :: %(name)s \n %(message)s')
+
+
+# define file handler and set formatter
 
 
 class LearningRateScheduler(Callback):
@@ -54,7 +63,7 @@ class LearningRateScheduler(Callback):
 
 class Metrics(F1Metrics):
 
-    def __init__(self, id2label, pad_value=0, val_data=None, val_gen=None, digits=4):
+    def __init__(self, id2label, pad_value=0, val_data=None, val_gen=None, digits=4, name=''):
         """
         Args:
             id2label (dict): id to label mapping.
@@ -64,6 +73,16 @@ class Metrics(F1Metrics):
               (use None to print only F1 score without a report).
         """
         super(F1Metrics, self).__init__()
+        self._name = name
+        self._logger = logging.getLogger(self._name)
+        file_handler = logging.FileHandler(
+            path_to_logs.joinpath('metrics',
+                                  '{}_{}'.format(datetime.datetime.now().strftime("%Y-%m-%d"), self._name)).as_posix())
+        file_handler.setFormatter(formatter_file)
+        self._logger.addHandler(file_handler)
+        self._logger.setLevel(logging.INFO)
+
+        self._name = name
         self.id2label = id2label
         self.pad_value = pad_value
         self._val_data = val_data
@@ -83,7 +102,7 @@ class Metrics(F1Metrics):
         precision = precision_score(y_true, y_pred)
         recall = recall_score(y_true, y_pred)
         if self._digits:
-            logger_file.info(classification_report(y_true, y_pred, digits=self._digits))
+            self._logger.info(classification_report(y_true, y_pred, digits=self._digits))
         return f1, precision, recall
 
     def on_epoch_end(self, epoch, logs={}):

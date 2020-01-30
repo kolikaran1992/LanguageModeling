@@ -3,6 +3,7 @@ train_lm.py
 .idea/
 logs/*
 weights/*
+data_processor/*
 !data_processor/.gitkeep
 !logs/.gitkeep
 !weights/.gitkeep

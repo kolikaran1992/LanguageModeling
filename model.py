@@ -1,6 +1,6 @@
 from keras.models import Model, Input
 from keras.layers import LSTM, Embedding, Dense, TimeDistributed, Dropout, Conv1D, MaxPool1D, \
-    Flatten, concatenate
+    Flatten, concatenate, Bidirectional
 from .__commons__ import *
 from .__layers__ import *
 from .__logger__ import LOGGER_NAME
@@ -130,10 +130,12 @@ class LanguageModel(object):
         self._model = model
         return self._model
 
+
 class SeqLabeller(LanguageModel):
-    def __init__(self, num_labels = None, *args, **kwargs):
+    def __init__(self, num_labels=None, lstm_units=256, *args, **kwargs):
         super(SeqLabeller, self).__init__(*args, **kwargs)
         self._num_labels = num_labels
+        self._lstm_units = lstm_units
 
     def get_model(self):
         if self._model:
@@ -145,16 +147,26 @@ class SeqLabeller(LanguageModel):
 
         embedding_layer = self._get_embedding_layer(word_in, char_in, jtype_in, train_wts=False)
 
-        l2r_lstm1, l2r_lstm2 = self._get_elmo_style_lstm_out(embedding_layer, name='l2r_lstm', rev=False, train_wts=False)
-        r2l_lstm1, r2l_lstm2 = self._get_elmo_style_lstm_out(embedding_layer, name='r2l_lstm', rev=True, train_wts=False)
+        l2r_lstm1, l2r_lstm2 = self._get_elmo_style_lstm_out(embedding_layer, name='l2r_lstm', rev=False,
+                                                             train_wts=False)
+        r2l_lstm1, r2l_lstm2 = self._get_elmo_style_lstm_out(embedding_layer, name='r2l_lstm', rev=True,
+                                                             train_wts=False)
 
         merged_lstm1 = concatenate([l2r_lstm1, r2l_lstm1], name='merge_lstm1')
         merged_lstm2 = concatenate([l2r_lstm2, r2l_lstm2], name='merge_lstm1_lstm2')
 
-        elmo_emb = ElmoEmb(name='elmo_embedding')([concatenate([embedding_layer, embedding_layer]), merged_lstm1, merged_lstm2])
+        elmo_emb = ElmoEmb(name='elmo_embedding')(
+            [concatenate([embedding_layer, embedding_layer]), merged_lstm1, merged_lstm2])
+
+        bidirectional_lstm = TimeDistributed(Bidirectional(LSTM(units=self._lstm_units,
+                                                                return_sequences=True,
+                                                                recurrent_dropout=self._rnn_dropout,
+                                                                name='pre_prediction_lstm'),
+                                                           name='bidirectional_lstm'),
+                                             name='time_distributed_lstm')(elmo_emb)
 
         model = TimeDistributed(Dense(self._num_labels, name='output_prediction', activation='softmax'))(
-            elmo_emb)
+            bidirectional_lstm)
         model = Model(inputs=[word_in, char_in, jtype_in], outputs=[model], name='PrepositionNER')
         self._model = model
         return self._model
